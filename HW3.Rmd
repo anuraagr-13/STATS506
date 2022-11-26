@@ -106,21 +106,29 @@ res
 
 ## Q6. 
 
-
-```{r}
-
-```
+git branch new  
+git checkout new
 
 ## Q7. 
 
 ```{r}
+df2 = read.csv('Data/AL.csv')
+df2 = df2[c('FIELD19', 'FIELD20', 'FIELD22', 'FIELD45', 'FIELD64', 'FIELD65')]
+
+colnames(df2) = c('householdwealth', 'income', 'home_value', 'state', 'countycode', 'censustract')
+df2 = df2[df2$home_value != 0, ]
+df2 = df2 %>% group_by(censustract) %>%
+  summarise(wealth = mean(householdwealth),
+            income = mean(income),
+            homevalue = mean(home_value))
+df2
 
 ```
 
 ## Q8. 
 
 ```{r}
-
+RMySQL::dbWriteTable(conn, name = 'df2', df2, overwrite = TRUE, row.names = FALSE)
 ```
 
 ## Q9. 

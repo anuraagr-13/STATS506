@@ -57,16 +57,28 @@ pwd = Sys.getenv('sqlpwd')
 conn = RMySQL::dbConnect(RMySQL::MySQL(), host = host_name, port = port_no, user = u_id,
                          password = pwd, dbname = db_name)
 
-RMySQL::dbWriteTable(conn, name = 'df1', df1, append = TRUE, row.names = FALSE)
+RMySQL::dbWriteTable(conn, name = 'df1', df1, overwrite = TRUE, row.names = FALSE)
 
 #5
 
 res = dbGetQuery(conn, 'SELECT censustract, salesvolume FROM df1 ORDER BY salesvolume DESC LIMIT 10')
 res
 
-
 #7
 
+df2 = read.csv('Data/AL.csv')
+df2 = df2[c('FIELD19', 'FIELD20', 'FIELD22', 'FIELD45', 'FIELD64', 'FIELD65')]
+
+colnames(df2) = c('householdwealth', 'income', 'home_value', 'state', 'countycode', 'censustract')
+df2 = df2[df2$home_value != 0, ]
+df2 = df2 %>% group_by(censustract) %>%
+  summarise(wealth = mean(householdwealth),
+            income = mean(income),
+            homevalue = mean(home_value))
+df2
 
 #8
 
+RMySQL::dbWriteTable(conn, name = 'df2', df2, overwrite = TRUE, row.names = FALSE)
+
+#10
