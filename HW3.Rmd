@@ -100,19 +100,12 @@ RMySQL::dbWriteTable(conn, name = 'df1', df1, append = TRUE, row.names = FALSE)
 ## Q5. 
 
 ```{r}
-
-
-```
-
-
-
-
-
-```{r}
-
+res = dbGetQuery(conn, 'SELECT censustract, salesvolume FROM df1 ORDER BY salesvolume DESC LIMIT 10')
+res
 ```
 
 ## Q6. 
+
 
 ```{r}
 
