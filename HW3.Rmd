@@ -179,6 +179,29 @@ combine = dbFetch(res)
 
 ## Q12. 
 
+commit a5226df2424f4f91b254264b54fa1ca938c77a17 (HEAD -> new)
+Author: Anuraag Ramesh <anuraagr@umich.edu>
+Date:   Sat Nov 26 23:49:33 2022 -0500
+
+    Question 11 Completed
+
+commit d398fbb8fa29c92fc9e878a62b0932129cd3c963 (origin/new)
+Author: Anuraag Ramesh <anuraagr@umich.edu>
+Date:   Fri Nov 25 22:55:19 2022 -0500
+
+    Question 8 Completed
+
+commit 210c0f5c9c2219a076f8e70392aa9eb245843c7e (origin/main, main)
+Author: Anuraag Ramesh <anuraagr@umich.edu>
+Date:   Fri Nov 25 21:51:26 2022 -0500
+
+    Q5 Completed
+
+commit e9353aadc7e50f2f6c1bf456fce013fd6f9321b4 (origin/master)
+Author: Anuraag Ramesh <anuraagr@umich.edu>
+Date:   Fri Nov 25 19:23:03 2022 -0500
+
+    Q5 Completed
 
 
 ## Q13. 
