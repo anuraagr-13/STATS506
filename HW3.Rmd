@@ -61,6 +61,8 @@ for (i in seq(1, 300001, by = 20000)){
     df = rbind(df, df1)
   }
 }
+
+df
 ```
 
 ```{r}
@@ -69,7 +71,7 @@ agg = df %>% group_by(censustract) %>%
             salesvolume = sum(salesvolumelocation))
 df1 = data.frame(agg)
 
-df1
+df1$censustract = as.character(df1$censustract)
 ```
 
 
@@ -86,7 +88,7 @@ CREATE TABLE df1 (
 ```{r}
 host_name = 'localhost'
 port_no = 3306
-db_name = 'HW3db'
+db_name = 'Hw3db'
 u_id = 'root'
 
 pwd = Sys.getenv('sqlpwd')
@@ -94,14 +96,14 @@ pwd = Sys.getenv('sqlpwd')
 conn = RMySQL::dbConnect(RMySQL::MySQL(), host = host_name, port = port_no, user = u_id,
                          password = pwd, dbname = db_name)
 
-RMySQL::dbWriteTable(conn, name = 'df1', df1, append = TRUE, row.names = FALSE)
+RMySQL::dbWriteTable(conn, name = 'df1', df1, overwrite = TRUE, row.names = FALSE)
 ```
 
 ## Q5. 
 
 ```{r}
 res = dbGetQuery(conn, 'SELECT censustract, salesvolume FROM df1 ORDER BY salesvolume DESC LIMIT 10')
-res
+head(res)
 ```
 
 ## Q6. 
@@ -121,8 +123,7 @@ df2 = df2 %>% group_by(censustract) %>%
   summarise(wealth = mean(householdwealth),
             income = mean(income),
             homevalue = mean(home_value))
-df2
-
+df2$censustract = as.character(df2$censustract)
 ```
 
 ## Q8. 
@@ -133,27 +134,52 @@ RMySQL::dbWriteTable(conn, name = 'df2', df2, overwrite = TRUE, row.names = FALS
 
 ## Q9. 
 
-```{r}
+commit d398fbb8fa29c92fc9e878a62b0932129cd3c963 (HEAD -> new, origin/new)
+Author: Anuraag Ramesh <anuraagr@umich.edu>
+Date:   Fri Nov 25 22:55:19 2022 -0500
 
-```
+    Question 8 Completed
+
+commit 210c0f5c9c2219a076f8e70392aa9eb245843c7e (origin/main, main)
+Author: Anuraag Ramesh <anuraagr@umich.edu>
+Date:   Fri Nov 25 21:51:26 2022 -0500
+
+    Q5 Completed
+
+commit e9353aadc7e50f2f6c1bf456fce013fd6f9321b4 (origin/master)
+Author: Anuraag Ramesh <anuraagr@umich.edu>
+Date:   Fri Nov 25 19:23:03 2022 -0500
+
+    Q5 Completed
+    
+HEAD means the current branch that is being checked out and points out the last commit.  
 
 ## Q10. 
 
 ```{r}
+Sys.getenv("CENSUS_API_KEY")
+census <- get_decennial(geography = 'tract', variables = c('H006001', 'H006002', 'H006003', 'H006004', 'H006005', 'H006006'), 
+                        year = 2010, state = '01')
+census = census %>% spread(variable, value)
 
+census$Whitepercent = census$H006002/census$H006001
+census$tract = gsub("[^0-9]","", census$NAME)
+
+RMySQL::dbWriteTable(conn, name = 'census', census, overwrite = TRUE, row.names = FALSE)
 ```
 
 ## Q11. 
 
 ```{r}
-
+res = dbSendQuery(conn, 'SELECT d2.censustract, d2.wealth, d2.income, d2.homevalue, d1.employeesize, d1.salesvolume, c.Whitepercent
+                        FROM df2 d2 JOIN df1 d1 ON d2.censustract = d1.censustract
+                        JOIN census c ON c.tract = d1.censustract')
+combine = dbFetch(res)
 ```
 
 ## Q12. 
 
-```{r}
 
-```
 
 ## Q13. 
 

@@ -1,5 +1,7 @@
 library(tidyverse)
+library(tidycensus)
 library(RMySQL)
+library(stringr)
 
 #2
 
@@ -43,13 +45,13 @@ agg = df %>% group_by(censustract) %>%
             salesvolume = sum(salesvolumelocation))
 df1 = data.frame(agg)
 
-df1
+df1$censustract = as.character(df1$censustract)
 
 #4
 
 host_name = 'localhost'
 port_no = 3306
-db_name = 'HW3db'
+db_name = 'Hw3db'
 u_id = 'root'
 
 pwd = Sys.getenv('sqlpwd')
@@ -75,10 +77,34 @@ df2 = df2 %>% group_by(censustract) %>%
   summarise(wealth = mean(householdwealth),
             income = mean(income),
             homevalue = mean(home_value))
-df2
+df2$censustract = as.character(df2$censustract)
 
 #8
 
 RMySQL::dbWriteTable(conn, name = 'df2', df2, overwrite = TRUE, row.names = FALSE)
 
 #10
+
+Sys.getenv("CENSUS_API_KEY")
+census <- get_decennial(geography = 'tract', variables = c('H006001', 'H006002', 'H006003', 'H006004', 'H006005', 'H006006'), 
+                        year = 2010, state = '01')
+census = census %>% spread(variable, value)
+
+census$Whitepercent = census$H006002/census$H006001
+census$tract = gsub("[^0-9]","", census$NAME)
+
+RMySQL::dbWriteTable(conn, name = 'census', census, overwrite = TRUE, row.names = FALSE)
+
+#11
+
+res = dbSendQuery(conn, 'SELECT d2.censustract, d2.wealth, d2.income, d2.homevalue, d1.employeesize, d1.salesvolume, c.Whitepercent
+                        FROM df2 d2 JOIN df1 d1 ON d2.censustract = d1.censustract
+                        JOIN census c ON c.tract = d1.censustract')
+combine = dbFetch(res)
+
+#13
+
+
+
+
+
