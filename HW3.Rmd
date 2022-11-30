@@ -1,7 +1,7 @@
 ---
-title: "STATS 506 HW 2"
+title: "STATS 506 HW 3"
 author: "Anuraag Ramesh"
-date: "October 27, 2022"
+date: "November 30, 2022"
 output:
   pdf_document:
     toc: yes
@@ -29,7 +29,7 @@ library(car)
 Configuration for Git is set on three levels System, Global and Local.
 The system that I am using is a Mac.  
  - The global git configuration file is in my Users folder on the Macintosh HD  
- - The local git configuration file is in the .git folder in the folder hw3 withr .R and .Rmd file. 
+ - The local git configuration file is in the .git folder in the folder hw3 with .R and .Rmd file. 
  
 ```{r}
 writeLines(readLines("/Users/anuraagramesh/.gitconfig", 10))
@@ -45,7 +45,8 @@ writeLines(readLines(".gitignore", 10))
 df_func <- function(n1, n2){
   headers = read.table('Data/2020_Business_Academic_QCQ.txt', sep = ',', nrows = 1,
                        encoding = 'UTF-8')
-  df = read.table('Data/2020_Business_Academic_QCQ.txt', sep = ',', skip = n1, nrows = n2 - n1, fileEncoding="latin1")
+  df = read.table('Data/2020_Business_Academic_QCQ.txt', sep = ',', skip = n1, 
+                  nrows = n2 - n1, fileEncoding="latin1")
   colnames(df) = headers
   df = df %>% select('State', 'County Code', 
                 'Employee Size (5) - Location', 
@@ -77,7 +78,7 @@ for (i in seq(1, 300001, by = 20000)){
   }
 }
 
-head(df)
+print(head(df))
 ```
 
 ```{r}
@@ -88,7 +89,7 @@ df1 = data.frame(agg)
 
 df1$censustract = as.character(df1$censustract)
 
-head(df1)
+print(head(df1))
 ```
 
 
@@ -120,11 +121,15 @@ RMySQL::dbWriteTable(conn, name = 'df1', df1, overwrite = TRUE, row.names = FALS
 ### 5. 
 
 ```{r}
-res = dbGetQuery(conn, 'SELECT countycode, censustract, salesvolume FROM df1 ORDER BY salesvolume DESC LIMIT 10')
-res
+res = dbGetQuery(conn, 'SELECT countycode, censustract, salesvolume FROM df1 ORDER 
+                 BY salesvolume DESC LIMIT 10')
+print(res)
 ```
 
 ### 6. 
+
+git commit -m "Question 5 Completed"
+git push origin main
 
 git branch new  
 git checkout new
@@ -143,16 +148,26 @@ df2 = df2 %>% group_by(countycode, censustract) %>%
             homevalue = mean(home_value))
 df2$censustract = as.character(df2$censustract)
 
-head(df2)
+print(head(df2))
 ```
 
 ### 8. 
+
+CREATE TABLE df2 (
+  countycode VARCHAR(255),
+	censustract VARCHAR(255),
+	wealth FLOAT,
+	income FLOAT,
+	homevalue FLOAT
+)
 
 ```{r}
 RMySQL::dbWriteTable(conn, name = 'df2', df2, overwrite = TRUE, row.names = FALSE)
 ```
 
 ### 9. 
+
+Git Log:  
 
 commit d398fbb8fa29c92fc9e878a62b0932129cd3c963 (HEAD -> new, origin/new)
 Author: Anuraag Ramesh <anuraagr@umich.edu>
@@ -178,7 +193,9 @@ HEAD means the current branch that is being checked out and points out the last 
 
 ```{r}
 Sys.getenv("CENSUS_API_KEY")
-census <- get_decennial(geography = 'tract', variables = c('H006001', 'H006002', 'H006003', 'H006004', 'H006005', 'H006006'), 
+census <- get_decennial(geography = 'tract', variables = c('H006001', 'H006002', 
+                                                           'H006003', 'H006004','H006005',
+                                                           'H006006'), 
                         year = 2010, state = '01')
 census = census %>% spread(variable, value)
 
@@ -200,13 +217,27 @@ RMySQL::dbWriteTable(conn, name = 'census', census, overwrite = TRUE, row.names 
 ### 11. 
 
 ```{r}
-combine = dbGetQuery(conn, 'SELECT d2.censustract, d2.wealth, d2.income, d2.homevalue, d1.employeesize, d1.salesvolume, c.whitepercent, c.blackpercent
-                        FROM df2 d2 JOIN df1 d1 ON d2.countycode = d1.countycode AND d2.censustract = d1.censustract
-                        JOIN census c ON c.countycode = d1.countycode AND c.tract = d1.censustract')
+combine = dbGetQuery(conn, 'SELECT d2.censustract, d2.wealth, d2.income, 
+d2.homevalue, d1.employeesize, d1.salesvolume, 
+c.whitepercent, c.blackpercent FROM 
+df2 d2 JOIN df1 d1 ON d2.countycode = d1.countycode AND
+d2.censustract = d1.censustract 
+JOIN census c ON c.countycode = d1.countycode AND 
+c.tract = d1.censustract')
 head(combine)
 ```
+Two variables that I would like to control the effects of are **average home size(sq. ft)** and **quality of construction rating**. Both these factors might affect average home valuations in a tract.  
 
 ### 12. 
+
+Commands to do the following:
+
+git commit -m "Question 11 Completed"  
+git log  
+git checkout main  
+git merge new  
+
+Git Log:  
 
 commit a5226df2424f4f91b254264b54fa1ca938c77a17 (HEAD -> new)
 Author: Anuraag Ramesh <anuraagr@umich.edu>
@@ -232,6 +263,7 @@ Date:   Fri Nov 25 19:23:03 2022 -0500
 
     Q5 Completed
     
+
 The way to reset back to the old repository is to use: `git reset --hard HEAD^`  
 
 
@@ -239,18 +271,20 @@ The way to reset back to the old repository is to use: `git reset --hard HEAD^`
 
 ```{r}
 #Correlation matrix
-cor(combine[c('wealth', 'income', 'homevalue', 'employeesize', 'salesvolume', 'blackpercent', 'whitepercent')], use = 'complete.obs')
+cor(combine[c('wealth', 'income', 'homevalue', 'employeesize', 
+              'salesvolume', 'blackpercent', 'whitepercent')], use = 'complete.obs')
 
 #Model only having the percentage of white people in a tract
-model_1 = lm(homevalue ~blackpercent, data = combine)
+model_1 = lm(homevalue ~ whitepercent, data = combine)
 summary(model_1)
 
 #Model only having the percentage of black people in a tract
-model_2 = lm(homevalue ~blackpercent, data = combine)
+model_2 = lm(homevalue ~ blackpercent, data = combine)
 summary(model_2)
 
 #First model
-model_3 = lm(homevalue ~ wealth + income + employeesize + salesvolume + blackpercent, data = combine)
+model_3 = lm(homevalue ~ wealth + employeesize + salesvolume + blackpercent, 
+             data = combine)
 summary(model_3)
 
 #Variance Inlation Factors
@@ -267,9 +301,17 @@ combine_standardized <-
          blackpercent_s = scale(blackpercent),
          homevalue_s = scale(homevalue))
 
-model_4 = lm(homevalue ~ wealth_s + employeesize_s + salesvolume_s + blackpercent_s, data = combine_standardized)
+model_4 = lm(homevalue ~ wealth_s + employeesize_s + salesvolume_s + 
+               blackpercent_s, data = combine_standardized)
 summary(model_4)
 ```
+
+From the correlation matrix as well as single variable models(model_1 and model_2), we can clearly see that the percentage of white people in a tract is positively correlated with home valuation. On the other hand, the percentage of black people in tract is negatively correlated with home valuation.   
+
+We can see that income and wealth is highly correlated so we remove one of them while creating a model(model_3). We calculate the variance inflation factor(VIF) to check if the co-variates are highly correlated.  
+
+**In the final model, we can see that whitepercent/blackpercent is significant in predicting home valuation.** This helps us answer thw initial question if racial bias is inherent in home valuattion.  
+One confounding factor is that the blackpercent co-variate has a positive coefficient. This is conflicting with the correlation matrix and single variable models, which suggest a negative realtion. This can be justified by the fact that the coefficients for multi-variable regression cannot be taken at face value. The fact that blackpercent and wealth are correlated plays an essential part in changing the coefficients, a high blackpercent could lead to a lower average wealth in a tract.  
 
 
 
@@ -277,13 +319,32 @@ summary(model_4)
 
 ### 1. 
 
+A core is a computational unit that actually runs the code that we want on the HPC cluster. It can actually consist of multiple processors.  
 
+A node is the server/computer where the memory as well as the processors are installed.  
 
+A compute node is where the computation happens. The user specifies the job/application to be run on the compute node using a fixed set of resources. The compute node consists of processors, memory and GPU.
+
+A login node is a place for users to interact with a cluster. Users can use a login node to view files, results as well as submit jobs.
 
 ### 2. 
 
+For an interactive session we use salloc instead of submitting a batch job.
+
+`salloc --nodes=1 --mem-per-cpu=32GB --cpus-per-task=4 --time=03:00:00`
 
 ### 3. 
+
+Path to my scratch directory: `/scratch/stats506s001f22_class_root/stats506s001f22_class/anuraagr`  
+
+
+Creating a symbolic link from my scratch to home directory:
+
+`ln -s /scratch/stats506s001f22_class_root/stats506s001f22_class/anuraagr`  
+
+
+Deleting a symbolic link does not affect the original directory, as it is a soft link.
+
 
 
 

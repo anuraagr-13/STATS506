@@ -123,18 +123,18 @@ combine
 cor(combine[c('wealth', 'income', 'homevalue', 'employeesize', 'salesvolume', 'blackpercent', 'whitepercent')], use = 'complete.obs')
 
 #Model only having the percentage of white people in a tract
-model_1 = lm(homevalue ~blackpercent, data = combine)
+model_1 = lm(homevalue ~ whitepercent, data = combine)
 summary(model_1)
 
 #Model only having the percentage of black people in a tract
-model_2 = lm(homevalue ~blackpercent, data = combine)
+model_2 = lm(homevalue ~ blackpercent, data = combine)
 summary(model_2)
 
 #First model
-model_3 = lm(homevalue ~ wealth + income + employeesize + salesvolume + blackpercent, data = combine)
+model_3 = lm(homevalue ~ wealth + employeesize + salesvolume + blackpercent, data = combine)
 summary(model_3)
 
-#Variance Inlation Factors
+#Variance Inflation Factors
 vif(model_3)
 
 #Standardizing the data
