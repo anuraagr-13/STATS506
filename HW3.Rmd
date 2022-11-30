@@ -9,6 +9,7 @@ output:
   html_document:
     toc: yes
     df_print: paged
+urlcolor: blue
 ---
 
 ```{r setup, include=FALSE}
@@ -24,12 +25,16 @@ library(car)
 
 ## Q1. 
 
+Here is a link to the github repository for Homework 3: [Homework 3 Github](https://github.com/anuraagr-13/STATS506/tree/main)  
+
 ### 1. 
 
 Configuration for Git is set on three levels System, Global and Local.
 The system that I am using is a Mac.  
  - The global git configuration file is in my Users folder on the Macintosh HD  
  - The local git configuration file is in the .git folder in the folder hw3 with .R and .Rmd file. 
+ 
+ 
  
 ```{r}
 writeLines(readLines("/Users/anuraagramesh/.gitconfig", 10))
@@ -48,6 +53,7 @@ df_func <- function(n1, n2){
   df = read.table('Data/2020_Business_Academic_QCQ.txt', sep = ',', skip = n1, 
                   nrows = n2 - n1, fileEncoding="latin1")
   colnames(df) = headers
+  
   df = df %>% select('State', 'County Code', 
                 'Employee Size (5) - Location', 
                 'Sales Volume (9) - Location', 
